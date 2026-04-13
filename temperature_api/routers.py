@@ -8,7 +8,7 @@ from city_api.models import City
 from dependencies import get_db
 from temperature_api.crud import create_temperature, get_temperature, update_temperature
 from temperature_api.models import Temperature
-from temperature_api.schemas import TemperatureCreateResponseSchema, TemperatureCreateSchema
+from temperature_api.schemas import TemperatureCreateResponseSchema, TemperatureCreateSchema, TemperatureUpdateSchema
 
 router = APIRouter()
 
@@ -24,15 +24,10 @@ async def checking_city(data:TemperatureCreateSchema, db: AsyncSession = Depends
 
 @router.post("/temperature", response_model=TemperatureCreateResponseSchema)
 async def temperature_create(
-        common: Annotated[dict, Depends(checking_city)],
+        common: Annotated[City, Depends(checking_city)],
         data:TemperatureCreateSchema,
         db: AsyncSession = Depends(get_db)
 ):
-    try:
-        common
-    except ValueError as e:
-        print(str(e))
-
     return await create_temperature(data=data, db=db)
 
 
@@ -42,7 +37,7 @@ async def get_list_temperatures(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/temperatures/{city_id}", response_model=TemperatureCreateResponseSchema)
-async def get_detail_temperature_by_city_id(city_id: int, db: AsyncSession = Depends(get_db)):
+async def get_detail_temperature_by_city_id(city_id: int | None = None, db: AsyncSession = Depends(get_db)):
     request = await db.execute(select(City).where(City.id == city_id))
     city = request.scalars().first()
 
@@ -55,6 +50,8 @@ async def get_detail_temperature_by_city_id(city_id: int, db: AsyncSession = Dep
     return temperature
 
 
-@router.post("/temperatures/update")
+@router.post("/temperatures/update", response_model=TemperatureUpdateSchema)
 async def temperature_update(db: AsyncSession = Depends(get_db)):
     await update_temperature(db=db)
+
+    return TemperatureUpdateSchema(message="Updated Successfully!")

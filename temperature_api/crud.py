@@ -23,6 +23,7 @@ async def create_temperature(data: TemperatureCreateSchema, db: AsyncSession):
 
     db.add(temperature)
     await db.commit()
+    await db.refresh(temperature)
 
     return temperature
 

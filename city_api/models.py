@@ -8,5 +8,5 @@ class City(Base):
     __tablename__ = "cities"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(255))
-    additional_info: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    additional_info: Mapped[str] = mapped_column(String(255), nullable=False)
