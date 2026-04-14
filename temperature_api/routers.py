@@ -36,18 +36,23 @@ async def get_list_temperatures(db: AsyncSession = Depends(get_db)):
     return await get_temperature(db=db)
 
 
-@router.get("/temperatures/{city_id}", response_model=TemperatureCreateResponseSchema)
+@router.get("/temperatures/", response_model=List[TemperatureCreateResponseSchema])
 async def get_detail_temperature_by_city_id(city_id: int | None = None, db: AsyncSession = Depends(get_db)):
-    request = await db.execute(select(City).where(City.id == city_id))
-    city = request.scalars().first()
 
-    if not city:
-        raise HTTPException(status_code=404, detail=f"City with the ID: {city_id} not found")
+    temperature = select(Temperature)
 
-    request = await db.execute(select(Temperature).where(Temperature.city_id == city_id))
-    temperature = request.scalars().first()
+    if city_id is not None:
+        request = await db.execute(select(City).where(City.id == city_id))
+        city = request.scalars().first()
 
-    return temperature
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City with the ID: {city_id} not found")
+
+        temperature = temperature.where(Temperature.city_id == city.id)
+    result = await db.execute(temperature)
+    temperatures = result.scalars().all()
+
+    return temperatures
 
 
 @router.post("/temperatures/update", response_model=TemperatureUpdateSchema)

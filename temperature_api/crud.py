@@ -58,15 +58,12 @@ async def update_temperature(db: AsyncSession):
 
                 current_temperature = data["main"]["temp"]
 
-                temp_request = await db.execute(
-                    select(Temperature).where(Temperature.city_id == city.id)
+                temp_record = Temperature(
+                    city_id=city.id,
+                    temperature=current_temperature
                 )
-                temp_record = temp_request.scalars().first()
-
-                if temp_record:
-                    temp_record.temperature = float(current_temperature)
-                    await db.commit()
-                    await db.refresh(temp_record)
+                db.add(temp_record)
+                await db.commit()
 
 
             except httpx.HTTPStatusError as e:

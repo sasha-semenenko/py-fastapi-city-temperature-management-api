@@ -17,7 +17,11 @@ class TemperatureCreateSchema(TemperatureBaseSchema):
 class TemperatureCreateResponseSchema(TemperatureCreateSchema):
     id: int
 
+    model_config = {"from_attributes": True}
+
 
 
 class TemperatureUpdateSchema(BaseModel):
     message: str
+
+    model_config = {"from_attributes": True}
